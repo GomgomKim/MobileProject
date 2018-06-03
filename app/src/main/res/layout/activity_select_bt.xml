@@ -9,6 +9,9 @@
     tools:context="org.androidtown.sharepic.SelectBT">
 
     <Button
+        android:text="픽쳐 액티비티로"
+        android:layout_marginLeft="100dp"
+        android:layout_marginTop="380dp"
         android:onClick="toCamera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
