@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/back"
+    tools:context="org.androidtown.sharepic.SelectBT">
+
+    <ImageButton
+        android:layout_marginTop="100dp"
+        android:id="@+id/bt1"
+        android:background="@drawable/btbtn1"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
+        android:layout_height="60dp" />
+    <ImageButton
+        android:layout_marginTop="15dp"
+        android:id="@+id/bt2"
+        android:background="@drawable/btbtn2"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
+        android:layout_height="60dp" />
+    <ImageButton
+        android:layout_marginTop="15dp"
+        android:id="@+id/bt3"
+        android:background="@drawable/btbtn3"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
+        android:layout_height="60dp" />
+    <ImageButton
+        android:layout_marginTop="15dp"
+        android:id="@+id/bt4"
+        android:background="@drawable/btbtn4"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
+        android:layout_height="60dp" />
+    <ImageButton
+        android:layout_marginTop="15dp"
+        android:id="@+id/bt5"
+        android:background="@drawable/btbtn5"
+        android:layout_gravity="center"
+        android:layout_width="100dp"
+        android:layout_height="60dp" />
+
+</LinearLayout>
