@@ -2,11 +2,12 @@ package org.androidtown.sharepic;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -47,8 +48,21 @@ public class PictureActivity extends AppCompatActivity {
 
     // 사진 찍기 코드
     public void accessCamera() {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        startActivity(intent);
+        Intent i = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
+        try {
+            PackageManager pm = getPackageManager();
+
+            final ResolveInfo mInfo = pm.resolveActivity(i, 0);
+
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(mInfo.activityInfo.packageName, mInfo.activityInfo.name));
+            intent.setAction(Intent.ACTION_MAIN);
+            intent.addCategory(Intent.CATEGORY_LAUNCHER);
+
+            startActivity(intent);
+        } catch (Exception e) {
+
+        }
     }
 
     // 사진 가져오기 코드
@@ -68,6 +82,7 @@ public class PictureActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        // 사진 가져오기
         if (requestCode == SELECT_IMAGE) {
             if (resultCode == Activity.RESULT_OK) {
                 selectPic.add(data.getData());
@@ -75,8 +90,7 @@ public class PictureActivity extends AppCompatActivity {
         }
     }
 
-
-    // 권한을 체크하는 함수. 필요한지는 모르겠음
+    // 권한을 체크하는 함수
     boolean checkAppPermission(String[] requestPermission) {
         boolean[] requestResult = new boolean[requestPermission.length];
         for (int i = 0; i < requestResult.length; i++) {
