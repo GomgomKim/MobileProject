@@ -202,5 +202,11 @@ public class SelectBT extends AppCompatActivity {
             finish();
         }
     }
+
+    // 카메라 activity로
+    public void toCamera(View view) {
+        Intent intent = new Intent(this, PictureActivity.class);
+        startActivity(intent);
+    }
 }
 
