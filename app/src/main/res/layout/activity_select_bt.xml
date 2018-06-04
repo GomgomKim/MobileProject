@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,11 +9,27 @@
     android:background="@drawable/back"
     tools:context="org.androidtown.sharepic.SelectBT">
 
+    <FrameLayout
+        android:id="@+id/takePicFrame"
+        android:layout_marginTop="100dp"
+        android:layout_width="match_parent"
+        android:layout_height="300dp">
+
+    </FrameLayout>
+    
     <Button
         android:text="픽쳐 액티비티로"
         android:layout_marginLeft="100dp"
-        android:layout_marginTop="380dp"
+        android:layout_marginTop="30dp"
         android:onClick="toCamera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+
+    <Button
+        android:id="@+id/sendImg"
+        android:text="사진찍기"
+        android:onClick="takePic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>

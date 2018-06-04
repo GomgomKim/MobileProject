@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.provider.MediaStore;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +41,13 @@ public class SelectBT extends AppCompatActivity {
     byte[] readBuffer;
     int readBufferPosition;
     String[] temp;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_select_bt);
+        //checkBluetooth();
+    }
 
     void checkBluetooth()
     {
@@ -123,14 +131,6 @@ public class SelectBT extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_select_bt);
-        checkBluetooth();
-    }
-
-
 
     //앱 종료될 때 입출력 스트림 소켓 닫음
     protected void onDestroy()
@@ -197,6 +197,13 @@ public class SelectBT extends AppCompatActivity {
     public void toCamera(View view) {
         Intent intent = new Intent(this, PictureActivity.class);
         startActivity(intent);
+    }
+
+    public void takePic(View view) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.takePicFrame, new TakePhotoFragment())
+                .commit();
     }
 }
 
