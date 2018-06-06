@@ -5,14 +5,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
-import android.provider.MediaStore;
+import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.Menu;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 import java.io.InputStream;
@@ -42,11 +38,13 @@ public class SelectBT extends AppCompatActivity {
     int readBufferPosition;
     String[] temp;
 
+    private static final UUID MY_UUID_INSECURE =
+            UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bt);
-        //checkBluetooth();
+        checkBluetooth();
     }
 
     void checkBluetooth()
@@ -78,19 +76,17 @@ public class SelectBT extends AppCompatActivity {
     {
         mRemoteDevice = getDeviceFromBondedList(paramString);
         //범용 고유 번호
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
         try
         {
             //소켓 생성
-            mSocket = mRemoteDevice.createRfcommSocketToServiceRecord(uuid);
+            mSocket = mRemoteDevice.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
             //소켓 연결
             mSocket.connect();
 
             //데이터 송수신 위해 스트림개설 -> onDestroy에서 닫음
             mOutputStream = mSocket.getOutputStream();
             mInputStream = mSocket.getInputStream();
-
         }
         catch (Exception e) //연결도중 오류나면
         {
