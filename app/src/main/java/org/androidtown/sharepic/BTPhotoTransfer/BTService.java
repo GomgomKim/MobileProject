@@ -1,9 +1,12 @@
 package org.androidtown.sharepic.BTPhotoTransfer;
 
-import android.app.Application;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
 import android.os.Handler;
+import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.androidtown.sharepic.btxfr.ClientThread;
@@ -12,8 +15,8 @@ import org.androidtown.sharepic.btxfr.ServerThread;
 
 import java.util.Set;
 
-public class MainApplication extends Application {
-    private static String TAG = "BTPHOTO/MainApplication";
+public class BTService extends Service {
+    private static String TAG = "BTPHOTO/BTService";
     protected static BluetoothAdapter adapter;
     protected static Set<BluetoothDevice> pairedDevices;
     protected static Handler clientHandler;
@@ -25,7 +28,12 @@ public class MainApplication extends Application {
     protected static final int PICTURE_RESULT_CODE = 1234;
     protected static final int REQUEST_ENABLE_BT = 10;
     protected static final int IMAGE_QUALITY = 100;
-    protected static boolean disableType; // false면 not support, true면 not enable
+    public static boolean disableType; // false면 not support, true면 not enable
+
+    // 외부로 데이터를 전달하려면 바인더 사용
+
+    // Binder 객체는 IBinder 인터페이스 상속구현 객체입니다
+    //public class Binder extends Object implements IBinder
 
     @Override
     public void onCreate() {
@@ -44,5 +52,18 @@ public class MainApplication extends Application {
         }
     }
 
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
 
 }

@@ -2,7 +2,6 @@ package org.androidtown.sharepic.BTPhotoTransfer;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -23,6 +22,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import org.androidtown.sharepic.MainActivity;
 import org.androidtown.sharepic.R;
 import org.androidtown.sharepic.btxfr.ClientThread;
 import org.androidtown.sharepic.btxfr.MessageType;
@@ -49,14 +49,22 @@ public class SelectBT2 extends Activity {
     private String fileName; //찍은 사진파일 이름
     private MyDBHandler dbHandler;
     private static final int PERMISSION_REQUEST_CODE = 123;
-//    private final String sendStringPath = Environment.getExternalStorageDirectory()+"/nirangnerangSend";
+    public static final int BT_DISABLE = 0;
+//    private final String sendStringPath = Environment.getExternalStorageDirectory()+"/nerang";
+
+    Button clientButton;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selectbt2);
 
-        dbHandler = new MyDBHandler(this, null, null, 1);
+        BTService.pairedDevices = null;
 
-        MainApplication.clientHandler = new Handler() {
+        clientButton = (Button) findViewById(R.id.clientButton);
+
+        dbHandler = new MyDBHandler(this, null, null, 1); //전송할파일uri 저장하기 위한 db handler입니다.
+
+        BTService.clientHandler = new Handler() {
 
             @Override
             public void handleMessage(Message message) { //보내는 쪽
@@ -81,7 +89,7 @@ public class SelectBT2 extends Activity {
                             options.inSampleSize = 2;
                             Bitmap image = BitmapFactory.decodeFile(file.getAbsolutePath(), options);
 
-                            image.compress(Bitmap.CompressFormat.JPEG, MainApplication.IMAGE_QUALITY, compressedImageStream);
+                            image.compress(Bitmap.CompressFormat.JPEG, BTService.IMAGE_QUALITY, compressedImageStream);
                             byte[] compressedImage = compressedImageStream.toByteArray();
                             Log.v(TAG, "Compressed image size: " + compressedImage.length);
 
@@ -91,7 +99,7 @@ public class SelectBT2 extends Activity {
                             // Invoke client thread to send
                             Message imageMessage = new Message();
                             imageMessage.obj = compressedImage;
-                            MainApplication.clientThread.incomingHandler.sendMessage(imageMessage);
+                            BTService.clientThread.incomingHandler.sendMessage(imageMessage);
 
                         } catch (Exception e) {
                             Log.d(TAG, e.toString());
@@ -124,7 +132,7 @@ public class SelectBT2 extends Activity {
         };
 
 
-        MainApplication.serverHandler = new Handler() {
+        BTService.serverHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {
                 switch (message.what) {
@@ -140,7 +148,7 @@ public class SelectBT2 extends Activity {
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
                         Date currentTime_1 = new Date();
                         String dateString = formatter.format(currentTime_1);
-                        saveBitmaptoJpeg(image, "nirang", MainApplication.IMAGE_FILE_NAME + dateString);//파일명예시: nr20180606043124.jpg
+                        saveBitmaptoJpeg(image, "nirang", BTService.IMAGE_FILE_NAME + dateString);//파일명예시: nr20180606043124.jpg
 
                         ImageView imageView = (ImageView) findViewById(R.id.imageView);
                         imageView.setImageBitmap(image);
@@ -154,8 +162,8 @@ public class SelectBT2 extends Activity {
 
                     case MessageType.DATA_PROGRESS_UPDATE: { //todo:없애기(우선확인위해남겨둠)
                         // some kind of update
-                        MainApplication.progressData = (ProgressData) message.obj;
-                        double pctRemaining = 100 - (((double) MainApplication.progressData.remainingSize / MainApplication.progressData.totalSize) * 100);
+                        BTService.progressData = (ProgressData) message.obj;
+                        double pctRemaining = 100 - (((double) BTService.progressData.remainingSize / BTService.progressData.totalSize) * 100);
                         if (progressDialog == null) {
                             progressDialog = new ProgressDialog(SelectBT2.this);
                             progressDialog.setMessage("Receiving photo...");
@@ -176,15 +184,51 @@ public class SelectBT2 extends Activity {
             }
         };
 
-        if(MainApplication.adapter == null){
-            MainApplication.adapter = BluetoothAdapter.getDefaultAdapter();
-            if(MainApplication.adapter == null){
-                Toast.makeText(this, "Bluetooth is not supported on this device", Toast.LENGTH_LONG).show();
-            }else{
-                if(!MainApplication.adapter.isEnabled()){
-                    Toast.makeText(this, "Bluetooth is not enabled on this device", Toast.LENGTH_LONG).show();
-                    startActivityForResult(new Intent("android.bluetooth.adapter.action.REQUEST_ENABLE"), MainApplication.REQUEST_ENABLE_BT);
+
+        if (BTService.adapter.isEnabled()) {
+            pairing();
+        } else {
+            startActivityForResult(new Intent("android.bluetooth.adapter.action.REQUEST_ENABLE"), BTService.REQUEST_ENABLE_BT);
+        }
+    }
+
+    private void pairing() {
+        BTService.pairedDevices = BTService.adapter.getBondedDevices();
+        if (BTService.pairedDevices != null) {
+            if (BTService.pairedDevices.size() == 0) {
+                Toast.makeText(this,"There are no paired device. Pairing please.",Toast.LENGTH_SHORT).show();
+            } else {
+                if (BTService.serverThread == null) {
+                    Log.v(TAG, "Starting server thread.  Able to accept photos.");
+                    BTService.serverThread = new ServerThread(BTService.adapter, BTService.serverHandler);
+                    BTService.serverThread.start();
                 }
+                ArrayList<DeviceData> deviceDataList = new ArrayList<DeviceData>();
+                for (BluetoothDevice device : BTService.pairedDevices) {
+                    deviceDataList.add(new DeviceData(device.getName(), device.getAddress()));
+                }
+
+                ArrayAdapter<DeviceData> deviceArrayAdapter = new ArrayAdapter<DeviceData>(this, android.R.layout.simple_spinner_item, deviceDataList);
+                deviceArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                deviceSpinner = (Spinner) findViewById(R.id.deviceSpinner);
+                deviceSpinner.setAdapter(deviceArrayAdapter);
+
+                clientButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        DeviceData deviceData = (DeviceData) deviceSpinner.getSelectedItem();
+                        for (BluetoothDevice device : BTService.adapter.getBondedDevices()) {
+                            if (device.getAddress().contains(deviceData.getValue())) {
+                                Log.v(TAG, "Starting client thread");
+                                if (BTService.clientThread != null) {
+                                    BTService.clientThread.cancel();
+                                }
+                                BTService.clientThread = new ClientThread(device, BTService.clientHandler);
+                                BTService.clientThread.start();
+                            }
+                        }
+                    }
+                });
             }
         }
     }
@@ -268,50 +312,15 @@ public class SelectBT2 extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
 
-        if (requestCode == MainApplication.REQUEST_ENABLE_BT){
-            MainApplication.pairedDevices = MainApplication.adapter.getBondedDevices();
-
-            if (MainApplication.pairedDevices != null) {
-                if (MainApplication.pairedDevices.size() == 0) {
-                    Toast.makeText(this,"There are no paired device.",Toast.LENGTH_SHORT).show();
-                } else {
-                    if (MainApplication.serverThread == null) {
-                        Log.v(TAG, "Starting server thread.  Able to accept photos.");
-                        MainApplication.serverThread = new ServerThread(MainApplication.adapter, MainApplication.serverHandler);
-                        MainApplication.serverThread.start();
-                    }
-                    ArrayList<DeviceData> deviceDataList = new ArrayList<DeviceData>();
-                    for (BluetoothDevice device : MainApplication.pairedDevices) {
-                        deviceDataList.add(new DeviceData(device.getName(), device.getAddress()));
-                    }
-
-                    ArrayAdapter<DeviceData> deviceArrayAdapter = new ArrayAdapter<DeviceData>(this, android.R.layout.simple_spinner_item, deviceDataList);
-                    deviceArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                    deviceSpinner = (Spinner) findViewById(R.id.deviceSpinner);
-                    deviceSpinner.setAdapter(deviceArrayAdapter);
-
-                    Button clientButton = (Button) findViewById(R.id.clientButton);
-                    clientButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            DeviceData deviceData = (DeviceData) deviceSpinner.getSelectedItem();
-                            for (BluetoothDevice device : MainApplication.adapter.getBondedDevices()) {
-                                if (device.getAddress().contains(deviceData.getValue())) {
-                                    Log.v(TAG, "Starting client thread");
-                                    if (MainApplication.clientThread != null) {
-                                        MainApplication.clientThread.cancel();
-                                    }
-                                    MainApplication.clientThread = new ClientThread(device, MainApplication.clientHandler);
-                                    MainApplication.clientThread.start();
-                                }
-                            }
-                        }
-                    });
-                }
+        if (requestCode == BTService.REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) { //연결에 성공하면 pairing한다
+                pairing();
+            }else{
+                startActivityForResult(new Intent(this, MainActivity.class),BT_DISABLE);
             }
         }
-    }
 
+    }
 
     class DeviceData {
         public DeviceData(String spinnerText, String value) {
