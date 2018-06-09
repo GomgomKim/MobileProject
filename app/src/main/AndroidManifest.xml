@@ -3,7 +3,8 @@
     package="org.androidtown.sharepic"
     android:versionCode="1"
     android:versionName="1.0">
-    <uses-sdk android:minSdkVersion="15"/>
+
+    <uses-sdk android:minSdkVersion="15" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
 
@@ -11,14 +12,22 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.percmission.CAMERA" />
 
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera2" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <uses-feature
         android:name="android.hardware.camera.any"
         android:required="true" />
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false" />
+
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -28,16 +37,27 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
         <service android:name=".BTPhotoTransfer.BTService" android:enabled="true"></service>
         <activity android:name=".MainActivity">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".BTPhotoTransfer.SelectBT2"/>
+        <activity android:name=".BTPhotoTransfer.SelectBT2" />
         <activity android:name=".SelectBT" />
         <activity android:name=".PictureActivity" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="org.androidtown.sharepic"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
+        <activity android:name=".PicObserve"></activity>
     </application>
 
 </manifest>

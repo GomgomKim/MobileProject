@@ -44,7 +44,7 @@ public class SelectBT extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_select_bt);
-        checkBluetooth();
+        //checkBluetooth();
     }
 
     void checkBluetooth()
@@ -83,7 +83,6 @@ public class SelectBT extends AppCompatActivity {
             mSocket = mRemoteDevice.createRfcommSocketToServiceRecord(MY_UUID_INSECURE);
             //소켓 연결
             mSocket.connect();
-
             //데이터 송수신 위해 스트림개설 -> onDestroy에서 닫음
             mOutputStream = mSocket.getOutputStream();
             mInputStream = mSocket.getInputStream();
