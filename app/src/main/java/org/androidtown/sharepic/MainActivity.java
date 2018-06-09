@@ -16,7 +16,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void connectBT(View view) {
 //        Intent intent = new Intent(MainActivity.this, SelectBT.class);
-        Intent intent = new Intent(MainActivity.this, SelectBT2.class);
+        Intent intent = new Intent(MainActivity.this, PicObserve.class);
         startActivity(intent);
     }
 }

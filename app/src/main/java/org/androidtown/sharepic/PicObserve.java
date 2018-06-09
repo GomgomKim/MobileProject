@@ -25,7 +25,6 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 
-import org.androidtown.sharepic.BTPhotoTransfer.MainApplication;
 import org.androidtown.sharepic.btxfr.ClientThread;
 
 import java.io.File;
