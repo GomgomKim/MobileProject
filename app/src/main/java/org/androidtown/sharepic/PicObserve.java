@@ -20,12 +20,15 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
 
 import org.androidtown.sharepic.btxfr.ClientThread;
+import org.androidtown.sharepic.btxfr.ServerThread;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -177,25 +180,6 @@ public class PicObserve extends AppCompatActivity {
         }
 
 
-        //블루투스사진 전송
-        /*ArrayAdapter<DeviceData> deviceArrayAdapter = new ArrayAdapter<DeviceData>(this, android.R.layout.simple_spinner_item, deviceDataList);
-        deviceArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        deviceSpinner = (Spinner) findViewById(R.id.deviceSpinner);
-        deviceSpinner.setAdapter(deviceArrayAdapter);
-        DeviceData deviceData = (DeviceData) deviceSpinner.getSelectedItem();
-        for (BluetoothDevice device : MainApplication.adapter.getBondedDevices()) {
-            if (device.getAddress().contains(deviceData.getValue())) {
-                Log.v(TAG, "Starting client thread");
-                if (MainApplication.clientThread != null) {
-                    MainApplication.clientThread.cancel();
-                }
-                MainApplication.clientThread = new ClientThread(device, MainApplication.clientHandler);
-                MainApplication.clientThread.start();
-            }
-        }*/
-
-
-
 
     }
 
@@ -285,21 +269,4 @@ public class PicObserve extends AppCompatActivity {
     }
 
 
-    class DeviceData {
-        public DeviceData(String spinnerText, String value) {
-            this.spinnerText = spinnerText;
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String toString() {
-            return spinnerText;
-        }
-
-        String spinnerText;
-        String value;
-    }
 }

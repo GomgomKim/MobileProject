@@ -1,5 +1,6 @@
 package org.androidtown.sharepic.btxfr;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.os.Handler;
@@ -18,6 +19,7 @@ public class ClientThread extends Thread {
     private final Handler handler;
     public Handler incomingHandler;
 
+    @SuppressLint("LongLogTag")
     public ClientThread(BluetoothDevice device, Handler handler) {
         BluetoothSocket tempSocket = null;
         this.handler = handler;
@@ -30,6 +32,7 @@ public class ClientThread extends Thread {
         this.socket = tempSocket;
     }
 
+    @SuppressLint("LongLogTag")
     public void run() {
         try {
             Log.v(TAG, "Opening client socket");
@@ -117,6 +120,7 @@ public class ClientThread extends Thread {
         Looper.loop();
     }
 
+    @SuppressLint("LongLogTag")
     public void cancel() {
         try {
             if (socket.isConnected()) {

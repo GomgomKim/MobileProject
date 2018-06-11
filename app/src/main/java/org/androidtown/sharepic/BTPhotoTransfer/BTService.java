@@ -35,6 +35,27 @@ public class BTService extends Service {
     // Binder 객체는 IBinder 인터페이스 상속구현 객체입니다
     //public class Binder extends Object implements IBinder
 
+    //기연추가
+    protected static DeviceData deviceData;
+
+    static class DeviceData {
+        public DeviceData(String spinnerText, String value) {
+            this.spinnerText = spinnerText;
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public String getSpinnerText() {
+            return spinnerText;
+        }
+
+        String spinnerText;
+        String value;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();

@@ -60,4 +60,6 @@
         <activity android:name=".PicObserve"></activity>
     </application>
 
+
+
 </manifest>
