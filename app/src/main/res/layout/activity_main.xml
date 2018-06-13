@@ -29,6 +29,7 @@
 
         <ImageButton
             android:background="@drawable/albumbtn"
+            android:onClick="albumBtn"
             android:layout_width="0dp"
             android:layout_weight="2"
             android:layout_height="wrap_content" />
@@ -57,11 +58,5 @@
         android:layout_weight="1"
         android:layout_width="wrap_content"
         android:layout_height="0dp"></LinearLayout>
-
-
-
-
-
-
 
 </LinearLayout>

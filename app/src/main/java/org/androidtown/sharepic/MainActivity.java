@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //블투버튼
     public void connectBT(View view) {
 //        Intent intent = new Intent(MainActivity.this, SelectBT.class);
         //BTService를 시작합니다. //background에서 실행 //블루투스 초기화함
@@ -37,6 +38,13 @@ public class MainActivity extends AppCompatActivity {
         startService(Service);
         Intent intent = new Intent(MainActivity.this, SelectBT2.class);
         startActivity(intent);
+    }
+
+    //앨범버튼
+    public void albumBtn(View view) {
+        Intent intent = new Intent(MainActivity.this, AlbumActivity.class);
+        startActivity(intent);
+
     }
 
     @Override
@@ -64,4 +72,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{type}, PERMISSION_REQUEST_CODE);
         }
     }
+
+
 }

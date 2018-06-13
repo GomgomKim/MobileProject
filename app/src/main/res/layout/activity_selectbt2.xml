@@ -1,73 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/back2"
     >
+    
+    <LinearLayout
+        android:layout_weight="0.4"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"></LinearLayout>
+    
+    <LinearLayout
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"></LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"></LinearLayout>
+
+            <Spinner
+                android:layout_weight="4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/deviceSpinner"
+                android:spinnerMode="dialog"/>
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"></LinearLayout>
+
+            <ImageButton
+                android:onClick="startEndBtn"
+                android:background="@drawable/startbtn"
+                android:layout_weight="1.5"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"></LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"></LinearLayout>
+
+
+
+
+    </LinearLayout>
+
+
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" android:layout_gravity="center">
-        <Spinner
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/deviceSpinner" android:layout_gravity="center"
-            android:spinnerMode="dialog"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Send Photo"
-            android:id="@+id/clientButton" android:layout_gravity="center"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="selectFolderBTN"
-            android:text="앨범 선택" />
-    </LinearLayout>
-    <Button
-        android:layout_gravity="center"
-        android:id="@+id/photobtn"
-        android:text="Take Photo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <!-- ~~~~~~~DB 테스트용~~~~~~~~~  -->
-    <LinearLayout
+        android:layout_weight="0.5"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_height="0dp">
 
-        <EditText
-            android:id="@+id/query"
+        <LinearLayout
+            android:layout_weight="1"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+            android:layout_height="match_parent"></LinearLayout>
 
-        <Button
-            android:id="@+id/queryBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="queryExec"
-            android:text="Exec" />
-        <Button
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="deletePicture"
-            android:text="Delete" />
+        <ImageView
+            android:background="@drawable/text"
+            android:layout_weight="3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent" />
+
+        <LinearLayout
+            android:layout_weight="0.5"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"></LinearLayout>
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_width="0dp"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_weight="0.3"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"></LinearLayout>
+
+            <ToggleButton
+                android:layout_weight="1.4"
+                android:id="@+id/toggleButton"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:background="@drawable/btn_toggle"
+                android:text="ToggleButton"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+            <LinearLayout
+                android:layout_weight="0.3"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"></LinearLayout>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"></LinearLayout>
+
     </LinearLayout>
 
-    <GridLayout
-        android:scrollbars="horizontal"
-        android:id="@+id/queryGrid"
+
+    <LinearLayout
+        android:layout_weight="0.23"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"></GridLayout>
-    <!-- 여기까지~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        android:layout_height="0dp"></LinearLayout>
 
     <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/imageView" android:layout_gravity="center_vertical|left"/>
+        android:layout_weight="4"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/imageView"
+        android:layout_gravity="center_vertical|left"
+        />
+
+    <LinearLayout
+        android:layout_weight="0.6"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"></LinearLayout>
 
 
 

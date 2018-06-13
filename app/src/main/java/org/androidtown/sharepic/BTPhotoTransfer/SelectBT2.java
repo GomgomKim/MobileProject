@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -30,14 +32,20 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
+import org.androidtown.sharepic.Album;
+import org.androidtown.sharepic.AlbumActivity;
+import org.androidtown.sharepic.AlbumDBHandler;
 import org.androidtown.sharepic.MainActivity;
+import org.androidtown.sharepic.Photo;
 import org.androidtown.sharepic.R;
 import org.androidtown.sharepic.btxfr.ClientThread;
 import org.androidtown.sharepic.btxfr.MessageType;
@@ -68,7 +76,8 @@ public class SelectBT2 extends Activity {
     public static final int BT_DISABLE = 0;
 //    private final String sendStringPath = Environment.getExternalStorageDirectory()+"/nerang";
 
-    Button clientButton;
+    ////send버튼 삭제했음
+//    Button clientButton;
 
     //추가부분
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -88,22 +97,49 @@ public class SelectBT2 extends Activity {
     ArrayList<DeviceData> deviceDataList;
     ArrayList<String> spinList;
 
-    // DB용
-    String pathNow;
-    EditText dbtestEdit;
-    GridLayout dbtestGrid;
+//    // DB용
+//    public static String pathNow;
+//    EditText dbtestEdit;
+//    GridLayout dbtestGrid;
+
+    ///////////// 앨범 추가 기능 /////////////
+    private ContentResolver contentResolver;
+
+    ToggleButton toggleButton;  // on / off
+
+    public static String album_title; // 현재 앨범 제목
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selectbt2);
 
-        //DB테스트
-        dbtestEdit = findViewById(R.id.query);
-        dbtestGrid = findViewById(R.id.queryGrid);
+        contentResolver = this.getContentResolver();
+
+        // 어플 내 앨범 목록
+
+        album_title = null;
+
+        toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+        toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    // 새로운 앨범
+                    start();
+                }else{
+                    album_title = null;
+                }
+            }
+        });
+
+//        //DB테스트
+//        dbtestEdit = findViewById(R.id.query);
+//        dbtestGrid = findViewById(R.id.queryGrid);
 
         BTService.pairedDevices = null;
 
-        clientButton = (Button) findViewById(R.id.clientButton);
+        //send버튼 삭제했음
+//        clientButton = (Button) findViewById(R.id.clientButton);
 
         dbHandler = new MyDBHandler(this, null, null, 1); //전송할파일uri 저장하기 위한 db handler입니다.
 
@@ -271,7 +307,8 @@ public class SelectBT2 extends Activity {
                     }
                 });
 
-                clientButton.setOnClickListener(new View.OnClickListener() {
+                //send 버튼 삭제했음
+                /*clientButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         deviceData = (DeviceData) deviceSpinner.getSelectedItem();
@@ -286,7 +323,7 @@ public class SelectBT2 extends Activity {
                             }
                         }
                     }
-                });
+                });*/
             }
         }
     }
@@ -307,7 +344,7 @@ public class SelectBT2 extends Activity {
 
     public void saveBitmaptoJpeg(Bitmap bitmap, String folder, String name){ //bitmap객체를 jpg파일로 변환해 저장.
 
-        String ex_storage = Environment.getExternalStorageDirectory().getAbsolutePath();
+        String ex_storage = Environment.getExternalStorageDirectory().toString();
         // Get Absolute Path in External Sdcard
 
         String foler_name = "/"+folder+"/";
@@ -326,6 +363,10 @@ public class SelectBT2 extends Activity {
             File nirang_file = new File(file_path, file_name);
             FileOutputStream out = new FileOutputStream(nirang_file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+            ///////////// 앨범 추가 기능 /////////////
+            insertAlbum(nirang_file);
+
             Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE); //미디어 스캐닝 (갤러리에 앨범 띄워주기 위해)
             intent.setData(Uri.fromFile(nirang_file));
             sendBroadcast(intent);
@@ -335,6 +376,20 @@ public class SelectBT2 extends Activity {
             Log.e("FileNotFoundException", exception.getMessage());
         }catch(IOException exception){
             Log.e("IOException", exception.getMessage());
+        }
+    }
+
+    ///////////// 앨범 추가 기능 /////////////
+    private void insertAlbum(File file1) {
+        String bUri = getImageContentUri(this, file1).toString();
+        System.out.println(bUri);
+        String imageId = bUri.substring(bUri.lastIndexOf("/")+1);
+        System.out.println(imageId);
+        Uri thumbnailUri = uriToThumbnail(imageId);
+        Photo photo = new Photo(thumbnailUri, Uri.parse(file1.getAbsolutePath()));
+        System.out.println(album_title);
+        if (album_title != null) {
+            newProduct(photo);
         }
     }
 
@@ -366,6 +421,8 @@ public class SelectBT2 extends Activity {
         }
 
     }
+
+
 
     class DeviceData {
         public DeviceData(String spinnerText, String value) {
@@ -423,6 +480,16 @@ public class SelectBT2 extends Activity {
                 out.close();
             } catch (Exception e) {
                 e.printStackTrace();
+            }
+
+            ///////////// 앨범 추가 기능 /////////////
+            String uString = getImageContentUri(this, file).toString();
+            String imageId = uString.substring(uString.lastIndexOf("/")+1);
+            System.out.println(imageId);
+            Uri thumbnailUri = uriToThumbnail(imageId);
+            Photo photo = new Photo(thumbnailUri, Uri.parse(file.getAbsolutePath()));
+            if (album_title != null) {
+                newProduct(photo);
             }
 
 
@@ -505,14 +572,16 @@ public class SelectBT2 extends Activity {
                 do {
                     String filePath = imageCursor.getString(dataColumnIndex);
                     if (!filePath.contains("nerang")) {
-                        filePaths.add(filePath);
-                        Uri imageUri = Uri.parse(filePath);
-                        uris.add(imageUri);
+                        if(!filePath.contains("nirang")) {
+                            filePaths.add(filePath);
+                            Uri imageUri = Uri.parse(filePath);
+                            uris.add(imageUri);
 
-                        // DB에 추가
-                        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-                        Picture picture = new Picture(imageUri, pathNow);
-                        dbHandler.addPicture(picture);
+//                            // DB에 추가
+//                            MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+//                            Picture picture = new Picture(imageUri, pathNow);
+//                            dbHandler.addPicture(picture);
+                        }
                     }
                 } while(imageCursor.moveToNext());
             }
@@ -527,75 +596,187 @@ public class SelectBT2 extends Activity {
 
     }
 
+    ///////////// 앨범 추가 기능 /////////////
+    public void goAlbum(View view) {
+        Intent intent = new Intent(this, AlbumActivity.class);
+        startActivity(intent);
+    }
 
-    // 폴더 지정
-    public void selectFolderBTN(View view) {
-        AlertDialog.Builder ad = new AlertDialog.Builder(SelectBT2.this);
+    public void start() {
+        AlertDialog.Builder ad = new AlertDialog.Builder(this);
 
-        ad.setTitle("앨범 선택");       // 제목 설정
-        ad.setMessage("저장할 폴더 이름을 적어주세요");   // 내용 설정
+        ad.setTitle("새로운 앨범");       // 제목 설정
+        ad.setMessage("이 앨범의 이름을 입력하십시오.");   // 내용 설정
 
-        final EditText et = new EditText(SelectBT2.this);
+// EditText 삽입하기
+        final EditText et = new EditText(this);
         ad.setView(et);
 
-        ad.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+// 확인 버튼 설정
+        ad.setPositiveButton("저장", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                pathNow = et.getText().toString();
-                dialog.dismiss();
+                Log.v("album", "Yes Btn Click");
+
+                // Text 값 받아서 로그 남기기
+                String value = et.getText().toString();
+                Log.v("album", value);
+                album_title = value;
+
+                dialog.dismiss();     //닫기
+                // Event
             }
         });
-        ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
+
+// 중립 버튼 설정
+//        ad.setNeutralButton("What?", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                Log.v(TAG,"Neutral Btn Click");
+//                dialog.dismiss();     //닫기
+//                // Event
+//            }
+//        });
+
+// 취소 버튼 설정
+        ad.setNegativeButton("취소", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
+                Log.v("album","No Btn Click");
+                dialog.dismiss();     //닫기
+                // Event
             }
         });
+
+// 창 띄우기
         ad.show();
     }
 
-    // db테스트용 코드
-    public void queryExec(View view) {
-        String sql = dbtestEdit.getText().toString();
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        Cursor cursor = dbHandler.selectQuery(sql);
-        cursor.moveToFirst();
-        if (!cursor.isAfterLast()) {
-            int column = cursor.getColumnCount();
-            int row = cursor.getCount();
-            dbtestGrid.removeAllViewsInLayout(); // layout안에 있는 모든 뷰를 없앤당
-            dbtestGrid.setColumnCount(column);
-            dbtestGrid.setRowCount(row + 1);
-            dbtestGrid.setUseDefaultMargins(true);
-
-            for (int i = 0; i < column; i++) {
-                View view1 = getLayoutInflater().inflate(R.layout.row, null);
-                TextView item = view1.findViewById(R.id.item);
-                item.setText(cursor.getColumnName(i));
-                item.setBackgroundColor(Color.LTGRAY);
-                dbtestGrid.addView(view1);
-            }
-            while (!cursor.isAfterLast()) {
-                for (int i = 0; i < column; i++) {
-                    View view1 = getLayoutInflater().inflate(R.layout.row, null);
-                    TextView item = (TextView) view1.findViewById(R.id.item);
-                    item.setText(cursor.getString(i));
-                    dbtestGrid.addView(view1);
-                }
-                cursor.moveToNext();
+    public static Uri getImageContentUri(Context context, File imageFile) {
+        String filePath = imageFile.getAbsolutePath();
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                new String[] { MediaStore.Images.Media._ID },
+                MediaStore.Images.Media.DATA + "=? ",
+                new String[] { filePath }, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
+            cursor.close();
+            return Uri.withAppendedPath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "" + id);
+        } else {
+            if (imageFile.exists()) {
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATA, filePath);
+                return context.getContentResolver().insert(
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            } else {
+                return null;
             }
         }
     }
 
-    public void deletePicture(View view) {
-        // DB를 전부 삭제
-        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
-        dbHandler.deleteAll();
-//        if (result) {
-//            dbtestEdit.setText("");
-//            Toast.makeText(this, "Record Deleted", Toast.LENGTH_SHORT).show();
-//        } else {
-//            Toast.makeText(this, "No Match Found", Toast.LENGTH_SHORT).show();
+    private Uri uriToThumbnail(String imageId) {
+        String[] projection = {MediaStore.Images.Thumbnails.DATA};
+
+        Cursor thumbnailCursor = contentResolver.query(
+                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+                projection, // Which columns to return
+                MediaStore.Images.Thumbnails.IMAGE_ID + "=?",
+                new String[]{imageId},
+                null);
+
+        if (thumbnailCursor.moveToFirst()) {
+            int thumbnailColumnIndex = thumbnailCursor.getColumnIndex(projection[0]);
+            // Generate a tiny thumbnail version.
+            String thumbnailPath = thumbnailCursor.getString(thumbnailColumnIndex);
+            thumbnailCursor.close();
+            return Uri.parse(thumbnailPath);
+        } else {
+            MediaStore.Images.Thumbnails.getThumbnail(contentResolver, Long.parseLong(imageId), MediaStore.Images.Thumbnails.MINI_KIND, null);
+            thumbnailCursor.close();
+            return uriToThumbnail(imageId);
+        }
+    }
+
+    public void newProduct(Photo photo) { // insert
+        AlbumDBHandler dbHandler = new AlbumDBHandler(this, null, null, 1);
+        Album product = new Album(album_title, photo);
+        dbHandler.addProduct(product);
+    }
+
+
+//    // 폴더 지정
+//    public void selectFolderBTN(View view) {
+//        AlertDialog.Builder ad = new AlertDialog.Builder(SelectBT2.this);
+//
+//        ad.setTitle("앨범 선택");       // 제목 설정
+//        ad.setMessage("저장할 폴더 이름을 적어주세요");   // 내용 설정
+//
+//        final EditText et = new EditText(SelectBT2.this);
+//        ad.setView(et);
+//
+//        ad.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                pathNow = et.getText().toString();
+//                dialog.dismiss();
+//            }
+//        });
+//        ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//            }
+//        });
+//        ad.show();
+//    }
+//
+//    // db테스트용 코드
+//    public void queryExec(View view) {
+//        String sql = dbtestEdit.getText().toString();
+//        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+//        Cursor cursor = dbHandler.selectQuery(sql);
+//        cursor.moveToFirst();
+//        if (!cursor.isAfterLast()) {
+//            int column = cursor.getColumnCount();
+//            int row = cursor.getCount();
+//            dbtestGrid.removeAllViewsInLayout(); // layout안에 있는 모든 뷰를 없앤당
+//            dbtestGrid.setColumnCount(column);
+//            dbtestGrid.setRowCount(row + 1);
+//            dbtestGrid.setUseDefaultMargins(true);
+//
+//            for (int i = 0; i < column; i++) {
+//                View view1 = getLayoutInflater().inflate(R.layout.row, null);
+//                TextView item = view1.findViewById(R.id.item);
+//                item.setText(cursor.getColumnName(i));
+//                item.setBackgroundColor(Color.LTGRAY);
+//                dbtestGrid.addView(view1);
+//            }
+//            while (!cursor.isAfterLast()) {
+//                for (int i = 0; i < column; i++) {
+//                    View view1 = getLayoutInflater().inflate(R.layout.row, null);
+//                    TextView item = (TextView) view1.findViewById(R.id.item);
+//                    item.setText(cursor.getString(i));
+//                    dbtestGrid.addView(view1);
+//                }
+//                cursor.moveToNext();
+//            }
 //        }
+//    }
+//
+//    public void deletePicture(View view) {
+//        // DB를 전부 삭제
+//        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+//        dbHandler.deleteAll();
+////        if (result) {
+////            dbtestEdit.setText("");
+////            Toast.makeText(this, "Record Deleted", Toast.LENGTH_SHORT).show();
+////        } else {
+////            Toast.makeText(this, "No Match Found", Toast.LENGTH_SHORT).show();
+////        }
+//    }
+
+
+    public void startEndBtn(View view) {
     }
 }
