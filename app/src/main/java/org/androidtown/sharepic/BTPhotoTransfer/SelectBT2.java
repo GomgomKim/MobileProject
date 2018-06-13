@@ -89,7 +89,7 @@ public class SelectBT2 extends Activity {
     ArrayList<String> spinList;
 
     // DB용
-    String pathNow;
+    public static String pathNow;
     EditText dbtestEdit;
     GridLayout dbtestGrid;
 
@@ -326,6 +326,12 @@ public class SelectBT2 extends Activity {
             File nirang_file = new File(file_path, file_name);
             FileOutputStream out = new FileOutputStream(nirang_file);
             bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+
+            // DB에 추가
+            MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+            Picture picture = new Picture(Uri.fromFile(nirang_file), "nirang");
+            dbHandler.addPicture(picture);
+
             Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE); //미디어 스캐닝 (갤러리에 앨범 띄워주기 위해)
             intent.setData(Uri.fromFile(nirang_file));
             sendBroadcast(intent);
