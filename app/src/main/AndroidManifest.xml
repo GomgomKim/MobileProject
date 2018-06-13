@@ -37,15 +37,21 @@
         android:theme="@style/Theme.AppCompat.NoActionBar">
         <service android:name=".BTPhotoTransfer.BTService" android:enabled="true"></service>
         <activity android:name=".MainActivity">
+        </activity>
+        <activity android:name=".BTPhotoTransfer.SelectBT2" />
+        <activity android:name=".SelectBT" />
+        <activity android:name=".PictureActivity" />
+        <activity android:name=".SplashActivity"
+            android:theme="@style/SplashTheme"
+            android:screenOrientation="portrait"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity android:name=".BTPhotoTransfer.SelectBT2" />
-        <activity android:name=".SelectBT" />
-        <activity android:name=".PictureActivity" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

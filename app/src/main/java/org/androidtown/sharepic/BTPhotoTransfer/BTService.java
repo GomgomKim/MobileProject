@@ -36,8 +36,8 @@ public class BTService extends Service {
     //public class Binder extends Object implements IBinder
 
     //기연추가
-    protected static DeviceData deviceData;
-
+    protected static DeviceData deviceData; //액티비티에서 이용할 서비스
+    //서비스에서 다루는 디바이스 데이터
     static class DeviceData {
         public DeviceData(String spinnerText, String value) {
             this.spinnerText = spinnerText;

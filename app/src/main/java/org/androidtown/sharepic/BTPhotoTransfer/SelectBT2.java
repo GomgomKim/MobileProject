@@ -1,9 +1,11 @@
 package org.androidtown.sharepic.BTPhotoTransfer;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -11,6 +13,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Build;
@@ -27,8 +30,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.androidtown.sharepic.MainActivity;
@@ -37,6 +43,7 @@ import org.androidtown.sharepic.btxfr.ClientThread;
 import org.androidtown.sharepic.btxfr.MessageType;
 import org.androidtown.sharepic.btxfr.ProgressData;
 import org.androidtown.sharepic.btxfr.ServerThread;
+import org.androidtown.sharepic.Picture;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -81,9 +88,18 @@ public class SelectBT2 extends Activity {
     ArrayList<DeviceData> deviceDataList;
     ArrayList<String> spinList;
 
+    // DB용
+    String pathNow;
+    EditText dbtestEdit;
+    GridLayout dbtestGrid;
+
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_selectbt2);
+
+        //DB테스트
+        dbtestEdit = findViewById(R.id.query);
+        dbtestGrid = findViewById(R.id.queryGrid);
 
         BTService.pairedDevices = null;
 
@@ -100,12 +116,6 @@ public class SelectBT2 extends Activity {
                         try {
                             //전처리 & 전송
 
-                            //권한
-                            if (Build.VERSION.SDK_INT >= 23) {
-                                if (!checkPermission()) {
-                                    requestPermission();
-                                }
-                            }
 
                             /*String sendStringPath =  Environment.getExternalStorageDirectory().toString();
                             fileName = "btimage.jpg"; //임의 지정
@@ -177,6 +187,8 @@ public class SelectBT2 extends Activity {
                         String dateString = formatter.format(currentTime_1);
                         saveBitmaptoJpeg(image, "nirang", BTService.IMAGE_FILE_NAME + dateString);//파일명예시: nr20180606043124.jpg
 
+
+
                         ImageView imageView = (ImageView) findViewById(R.id.imageView);
                         imageView.setImageBitmap(image);
                         break;
@@ -236,19 +248,21 @@ public class SelectBT2 extends Activity {
                 spinList = new ArrayList<>();
                 for (BluetoothDevice device : BTService.pairedDevices) {
                     deviceDataList.add(new DeviceData(device.getName(), device.getAddress()));
-                    spinList.add(device.getName());
+                    spinList.add(device.getName()); //기연추가 스핀 목록위해 String 어레이리스트 생성
                 }
 
                 ArrayAdapter<String> deviceArrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, spinList);
                 deviceArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 deviceSpinner = (Spinner) findViewById(R.id.deviceSpinner);
                 deviceSpinner.setAdapter(deviceArrayAdapter);
+
+                //기연추가 스피너 선택시 들어가도록
                 deviceSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         bt_devicedata = new BTService.DeviceData(deviceDataList.get(position).getSpinnerText(), deviceDataList.get(position).getValue());
-                        Log.i("datas ", bt_devicedata.getSpinnerText()+ " " + bt_devicedata.getValue());
-                        Log.i("풀네임 : ", deviceSpinner.getSelectedItem().toString());
+                        /*Log.i("datas ", bt_devicedata.getSpinnerText()+ " " + bt_devicedata.getValue());
+                        Log.i("풀네임 : ", deviceSpinner.getSelectedItem().toString());*/
                     }
 
                     @Override
@@ -277,23 +291,6 @@ public class SelectBT2 extends Activity {
         }
     }
 
-    private boolean checkPermission() {
-        int result = ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void requestPermission() {
-
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Toast.makeText(this, "Write External Storage permission allows us to do store images. Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-        }
-    }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
@@ -308,34 +305,38 @@ public class SelectBT2 extends Activity {
         }
     }
 
-    public static void saveBitmaptoJpeg(Bitmap bitmap, String folder, String name){ //bitmap객체를 jpg파일로 변환해 저장.
+    public void saveBitmaptoJpeg(Bitmap bitmap, String folder, String name){ //bitmap객체를 jpg파일로 변환해 저장.
 
         String ex_storage = Environment.getExternalStorageDirectory().getAbsolutePath();
         // Get Absolute Path in External Sdcard
 
         String foler_name = "/"+folder+"/";
-        String file_name = name+".jpg";
+        String file_name = name+".jpg"; //=fname
         String string_path = ex_storage+foler_name;
 
         File file_path;
 
         try{
-            file_path = new File(string_path);
-            if(!file_path.isDirectory()){
+            file_path = new File(string_path); // file
+            if(!file_path.isDirectory()) {
                 file_path.mkdirs();
             }
-            FileOutputStream out = new FileOutputStream(string_path+file_name);
 
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
+            //기연 수정. file 정보 수정
+            File nirang_file = new File(file_path, file_name);
+            FileOutputStream out = new FileOutputStream(nirang_file);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE); //미디어 스캐닝 (갤러리에 앨범 띄워주기 위해)
+            intent.setData(Uri.fromFile(nirang_file));
+            sendBroadcast(intent);
+            out.flush();
             out.close();
         }catch(FileNotFoundException exception){
             Log.e("FileNotFoundException", exception.getMessage());
         }catch(IOException exception){
             Log.e("IOException", exception.getMessage());
         }
-
     }
-
 
     @Override
     protected void onStop() {
@@ -399,13 +400,6 @@ public class SelectBT2 extends Activity {
             myDir.mkdirs();
         }
 
-        //권한
-        if (Build.VERSION.SDK_INT >= 23) { //todo:권한 앱 처음 실행시킬 때로 옮겨야 됨
-            if (!checkPermission2(WES)) { //여기코드 checkPermission 이랑 겹쳐서(매개번수가 다름) 2로 수정함 (추후 옮길 예정)
-                requestPermission2(WES);
-            }
-        }
-
         String filePath;
         Bitmap picture_bitmap;
         Uri uri;
@@ -415,7 +409,7 @@ public class SelectBT2 extends Activity {
 
             //사진 복사본 파일 저장
             String image_name = String.valueOf(System.currentTimeMillis());
-            String fname = "Image-" + image_name + ".jpg";
+            String fname = "Image-" + image_name + ".jpg"; //이미지 이름
             file = new File(myDir, fname);
             fileName = fname;
             System.out.println(file.getAbsolutePath()); //로그캣 확인
@@ -431,9 +425,10 @@ public class SelectBT2 extends Activity {
                 e.printStackTrace();
             }
 
-            //자동전송
+
+            //자동전송 기연추가
             for (BluetoothDevice device : BTService.adapter.getBondedDevices()) {
-                if (device.getAddress().contains(bt_devicedata.getValue())) {
+                if (device.getAddress().contains(bt_devicedata.getValue())) { //서비스에서 받아오도록했음
                     Log.v(TAG, "Starting client thread");
                     if (BTService.clientThread != null) {
                         BTService.clientThread.cancel();
@@ -443,6 +438,7 @@ public class SelectBT2 extends Activity {
                 }
             }
 
+            //앨범 삭제
             MediaScannerConnection.scanFile(getApplicationContext(), new String[]{file.getPath()}, new String[]{"image/jpeg"}, null);
             Uri images = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
             String selection = MediaStore.Images.Media.DATA + " = ?";
@@ -455,11 +451,7 @@ public class SelectBT2 extends Activity {
             if(file_delete.exists()){
                 file_delete.delete();
             }
-
         }
-
-
-
     }
     public void init2() {
         resolver = getContentResolver();
@@ -472,8 +464,6 @@ public class SelectBT2 extends Activity {
                 if(filePaths.size() > 0) {
                     moveFile();
                 }
-
-
             }
         };
 
@@ -498,14 +488,6 @@ public class SelectBT2 extends Activity {
 
         String where = MediaStore.MediaColumns.DATE_ADDED + ">" + (lastDatabaseUpdateTime/1000); //조건 : 전에 추가됐던 시간 이후에 추가 된 사진
 
-
-        //권한
-        if (Build.VERSION.SDK_INT >= 23) { //todo:권한 앱 처음 실행시킬 때로 옮겨야 됨
-            if (!checkPermission2(RES)) {
-                requestPermission2(RES);
-            }
-        }
-
         Cursor imageCursor = MediaStore.Images.Media.query(getContentResolver(), MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, where, null, null);
 
 
@@ -526,6 +508,11 @@ public class SelectBT2 extends Activity {
                         filePaths.add(filePath);
                         Uri imageUri = Uri.parse(filePath);
                         uris.add(imageUri);
+
+                        // DB에 추가
+                        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+                        Picture picture = new Picture(imageUri, pathNow);
+                        dbHandler.addPicture(picture);
                     }
                 } while(imageCursor.moveToNext());
             }
@@ -540,20 +527,75 @@ public class SelectBT2 extends Activity {
 
     }
 
-    private boolean checkPermission2(String type) {
-        int result = ContextCompat.checkSelfPermission(this, type);
-        if (result == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            return false;
+
+    // 폴더 지정
+    public void selectFolderBTN(View view) {
+        AlertDialog.Builder ad = new AlertDialog.Builder(SelectBT2.this);
+
+        ad.setTitle("앨범 선택");       // 제목 설정
+        ad.setMessage("저장할 폴더 이름을 적어주세요");   // 내용 설정
+
+        final EditText et = new EditText(SelectBT2.this);
+        ad.setView(et);
+
+        ad.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                pathNow = et.getText().toString();
+                dialog.dismiss();
+            }
+        });
+        ad.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        ad.show();
+    }
+
+    // db테스트용 코드
+    public void queryExec(View view) {
+        String sql = dbtestEdit.getText().toString();
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+        Cursor cursor = dbHandler.selectQuery(sql);
+        cursor.moveToFirst();
+        if (!cursor.isAfterLast()) {
+            int column = cursor.getColumnCount();
+            int row = cursor.getCount();
+            dbtestGrid.removeAllViewsInLayout(); // layout안에 있는 모든 뷰를 없앤당
+            dbtestGrid.setColumnCount(column);
+            dbtestGrid.setRowCount(row + 1);
+            dbtestGrid.setUseDefaultMargins(true);
+
+            for (int i = 0; i < column; i++) {
+                View view1 = getLayoutInflater().inflate(R.layout.row, null);
+                TextView item = view1.findViewById(R.id.item);
+                item.setText(cursor.getColumnName(i));
+                item.setBackgroundColor(Color.LTGRAY);
+                dbtestGrid.addView(view1);
+            }
+            while (!cursor.isAfterLast()) {
+                for (int i = 0; i < column; i++) {
+                    View view1 = getLayoutInflater().inflate(R.layout.row, null);
+                    TextView item = (TextView) view1.findViewById(R.id.item);
+                    item.setText(cursor.getString(i));
+                    dbtestGrid.addView(view1);
+                }
+                cursor.moveToNext();
+            }
         }
     }
 
-    private void requestPermission2(String type) {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,type)) {
-            Toast.makeText(this, "Write External Storage permission allows us to do store images. Please allow this permission in App Settings.", Toast.LENGTH_LONG).show();
-        } else {
-            ActivityCompat.requestPermissions(this, new String[]{type}, PERMISSION_REQUEST_CODE);
-        }
+    public void deletePicture(View view) {
+        // DB를 전부 삭제
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+        dbHandler.deleteAll();
+//        if (result) {
+//            dbtestEdit.setText("");
+//            Toast.makeText(this, "Record Deleted", Toast.LENGTH_SHORT).show();
+//        } else {
+//            Toast.makeText(this, "No Match Found", Toast.LENGTH_SHORT).show();
+//        }
     }
 }

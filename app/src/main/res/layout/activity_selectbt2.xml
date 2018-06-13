@@ -18,6 +18,11 @@
             android:layout_height="wrap_content"
             android:text="Send Photo"
             android:id="@+id/clientButton" android:layout_gravity="center"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="selectFolderBTN"
+            android:text="앨범 선택" />
     </LinearLayout>
     <Button
         android:layout_gravity="center"
@@ -25,9 +30,46 @@
         android:text="Take Photo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <!-- ~~~~~~~DB 테스트용~~~~~~~~~  -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/query"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/queryBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="queryExec"
+            android:text="Exec" />
+        <Button
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="deletePicture"
+            android:text="Delete" />
+    </LinearLayout>
+
+    <GridLayout
+        android:scrollbars="horizontal"
+        android:id="@+id/queryGrid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></GridLayout>
+    <!-- 여기까지~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:id="@+id/imageView" android:layout_gravity="center_vertical|left"/>
-</LinearLayout>
 
+
+
+
+</LinearLayout>
