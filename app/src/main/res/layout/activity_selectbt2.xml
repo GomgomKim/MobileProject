@@ -18,51 +18,60 @@
             android:layout_height="wrap_content"
             android:text="Send Photo"
             android:id="@+id/clientButton" android:layout_gravity="center"/>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="selectFolderBTN"
-            android:text="앨범 선택" />
+        <!--<Button-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="selectFolderBTN"-->
+            <!--android:text="앨범 선택" />-->
     </LinearLayout>
     <Button
-        android:layout_gravity="center"
         android:id="@+id/photobtn"
-        android:text="Take Photo"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <!-- ~~~~~~~DB 테스트용~~~~~~~~~  -->
-    <LinearLayout
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_gravity="center"
+        android:onClick="goAlbum"
+        android:text="Take Photo" />
 
-        <EditText
-            android:id="@+id/query"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
+    <ToggleButton
+        android:id="@+id/toggleButton"
+        android:layout_width="50dp"
+        android:layout_height="25dp"
+        android:background="@drawable/btn_toggle"
+        android:text="ToggleButton"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-        <Button
-            android:id="@+id/queryBtn"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="queryExec"
-            android:text="Exec" />
-        <Button
-            android:id="@+id/delete"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="deletePicture"
-            android:text="Delete" />
-    </LinearLayout>
+    <!--&lt;!&ndash; ~~~~~~~DB 테스트용~~~~~~~~~  &ndash;&gt;-->
+    <!--<LinearLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="horizontal">-->
 
-    <GridLayout
-        android:scrollbars="horizontal"
-        android:id="@+id/queryGrid"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></GridLayout>
-    <!-- 여기까지~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+        <!--<EditText-->
+            <!--android:id="@+id/query"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="1" />-->
+
+        <!--<Button-->
+            <!--android:id="@+id/queryBtn"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="queryExec"-->
+            <!--android:text="Exec" />-->
+        <!--<Button-->
+            <!--android:id="@+id/delete"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:onClick="deletePicture"-->
+            <!--android:text="Delete" />-->
+    <!--</LinearLayout>-->
+
+    <!--<GridLayout-->
+        <!--android:scrollbars="horizontal"-->
+        <!--android:id="@+id/queryGrid"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"></GridLayout>-->
+    <!--&lt;!&ndash; 여기까지~~~~~~~~~~~~~~~~~~~~~~~~~~~ &ndash;&gt;-->
 
     <ImageView
         android:layout_width="fill_parent"
