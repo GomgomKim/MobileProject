@@ -9,6 +9,8 @@
     tools:context="org.androidtown.sharepic.MainActivity">
 
 
+    <!--빈 레이아웃을 중간중간 두어서 weight 로 처리함-->
+
     <LinearLayout
         android:layout_weight="1.5"
         android:layout_width="wrap_content"
