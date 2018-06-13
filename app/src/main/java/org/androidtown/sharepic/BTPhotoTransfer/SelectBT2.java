@@ -98,8 +98,8 @@ public class SelectBT2 extends Activity {
         setContentView(R.layout.activity_selectbt2);
 
         //DB테스트
-        /*dbtestEdit = findViewById(R.id.query);
-        dbtestGrid = findViewById(R.id.queryGrid);*/
+        dbtestEdit = findViewById(R.id.query);
+        dbtestGrid = findViewById(R.id.queryGrid);
 
         BTService.pairedDevices = null;
 
@@ -291,6 +291,7 @@ public class SelectBT2 extends Activity {
         }
     }
 
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -304,7 +305,6 @@ public class SelectBT2 extends Activity {
         }
     }
 
-    //nirang저장부분
     public void saveBitmaptoJpeg(Bitmap bitmap, String folder, String name){ //bitmap객체를 jpg파일로 변환해 저장.
 
         String ex_storage = Environment.getExternalStorageDirectory().getAbsolutePath();
