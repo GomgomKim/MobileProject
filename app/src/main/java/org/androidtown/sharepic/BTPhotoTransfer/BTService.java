@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.androidtown.sharepic.MyApplication;
 import org.androidtown.sharepic.btxfr.ClientThread;
 import org.androidtown.sharepic.btxfr.ProgressData;
 import org.androidtown.sharepic.btxfr.ServerThread;
@@ -28,48 +29,34 @@ public class BTService extends Service {
     protected static final int PICTURE_RESULT_CODE = 1234;
     protected static final int REQUEST_ENABLE_BT = 10;
     protected static final int IMAGE_QUALITY = 100;
-    public static boolean disableType; // false면 not support, true면 not enable
-
+    protected static boolean disableType; // false면 not support, true면 not enable
+    protected static BluetoothDevice device;
     // 외부로 데이터를 전달하려면 바인더 사용
 
     // Binder 객체는 IBinder 인터페이스 상속구현 객체입니다
     //public class Binder extends Object implements IBinder
 
     //기연추가
-    protected static DeviceData deviceData; //액티비티에서 이용할 서비스
+   // protected static SelectBT2.DeviceData deviceData; //액티비티에서 이용할 서비스
     //서비스에서 다루는 디바이스 데이터
-    static class DeviceData {
-        public DeviceData(String spinnerText, String value) {
-            this.spinnerText = spinnerText;
-            this.value = value;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public String getSpinnerText() {
-            return spinnerText;
-        }
-
-        String spinnerText;
-        String value;
-    }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        adapter = BluetoothAdapter.getDefaultAdapter();
-        if (adapter != null) {
-            if (adapter.isEnabled()) {
-                pairedDevices = adapter.getBondedDevices();
+        MyApplication myapp = (MyApplication)getApplication();
+        if(!myapp.isOn()) {
+            adapter = BluetoothAdapter.getDefaultAdapter();
+            if (adapter != null) {
+                if (adapter.isEnabled()) {
+                    pairedDevices = adapter.getBondedDevices();
+                } else {
+                    Log.e(TAG, "Bluetooth is not enabled");
+                    disableType = false;
+                }
             } else {
-                Log.e(TAG, "Bluetooth is not enabled");
-                disableType=false;
+                Log.e(TAG, "Bluetooth is not supported on this device");
+                disableType = true;
             }
-        } else {
-            Log.e(TAG, "Bluetooth is not supported on this device");
-            disableType=true;
         }
     }
 
@@ -84,6 +71,7 @@ public class BTService extends Service {
     }
     @Override
     public void onDestroy() {
+        adapter = null;
         super.onDestroy();
     }
 
